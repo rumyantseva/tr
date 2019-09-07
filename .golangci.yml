@@ -1,0 +1,58 @@
+run:
+  concurrency: 4
+  deadline: 1m
+  issues-exit-code: 1
+  tests: true
+  modules-download-mode: readonly
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  govet:
+    check-shadowing: true
+  golint:
+    min-confidence: 0.8
+  gocyclo:
+    min-complexity: 10
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  lll:
+    line-length: 120
+    tab-width: 1
+  nakedret:
+    max-func-lines: 30
+
+linters:
+  enable:
+    - golint
+    - govet
+    - goimports
+    - staticcheck
+    - errcheck
+    - unused
+    - gosimple
+    - structcheck
+    - varcheck
+    - ineffassign
+    - deadcode
+    - typecheck
+    - bodyclose
+    - gosec
+    - interfacer
+    - unconvert
+    - unparam
+    - goconst
+    - gocyclo
+    - maligned
+    - misspell
+    - lll
+    - nakedret
+    - gocritic
+  enable-all: false
