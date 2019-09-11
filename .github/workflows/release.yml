@@ -14,6 +14,7 @@ jobs:
       matrix:
         goos: [linux, darwin]
         goarch: [amd64]
+        release: ['${{ github.ref }})']
 
     steps:
       - uses: actions/checkout@v1
@@ -22,12 +23,11 @@ jobs:
       - uses: actions/setup-go@v1
         with:
           go-version: '1.13'
-      - run: RELEASE=${RELEASE} GOOS=${GOOS} GOARCH=${GOARCH} make build
+      - run: RELEASE=${{ matrix.release }} GOOS=${GOOS} GOARCH=${GOARCH} make build
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-          RELEASE: $(basename ${{ github.ref }})
       - uses: actions/upload-artifact@v1
         with:
-          name: tr-$(basename ${{ github.ref }})-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: tr-${{ matrix.release }}-${{ matrix.goos }}-${{ matrix.goarch }}
           path: ./bin/${{ matrix.goos }}-${{ matrix.goarch }}/tr
