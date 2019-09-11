@@ -11,6 +11,12 @@ import (
 	"golang.org/x/net/ipv6"
 )
 
+type connProperties struct {
+	address   string
+	icmpType  icmp.Type
+	ianaProto int
+}
+
 type IPVersion string
 
 const (
@@ -28,18 +34,20 @@ const (
 	icmpEchoReply    = "echo reply"
 )
 
-func Build(host string, ipv IPVersion, maxTTL int, callback func(hop *Hop, err error)) {
+func Build(host string, ipv IPVersion, maxTTL int, timeout, pause time.Duration, callback func(hop *Hop, err error)) {
 	for ttl := 1; ttl <= maxTTL; ttl++ {
-		hop, reached, err := hop(host, ipv, ttl)
+		hop, reached, err := hop(host, ipv, ttl, timeout)
 		callback(hop, err)
 
 		if reached {
 			break
 		}
+
+		time.Sleep(pause)
 	}
 }
 
-func hop(host string, ipv IPVersion, ttl int) (hop *Hop, reached bool, err error) {
+func hop(host string, ipv IPVersion, ttl int, timeout time.Duration) (hop *Hop, reached bool, err error) {
 	network := string(ipv) + ":icmp"
 	netConn, err := net.Dial(network, host)
 	if err != nil {
@@ -53,33 +61,18 @@ func hop(host string, ipv IPVersion, ttl int) (hop *Hop, reached bool, err error
 		}
 	}()
 
-	var address string
-	var icmpType icmp.Type
-	var ianaProto int
-	switch ipv {
-	case IPv4:
-		address = "0.0.0.0"
-		icmpType = ipv4.ICMPTypeEcho
-		ianaProto = ianaProtocolICMP
-
-		if err = ipv4.NewConn(netConn).SetTTL(ttl); err != nil {
-			return
-		}
-
-	case IPv6:
-		address = "::0"
-		icmpType = ipv6.ICMPTypeEchoRequest
-		ianaProto = ianaProtocolIPv6ICMP
-
-		if err = ipv6.NewConn(netConn).SetHopLimit(ttl); err != nil {
-			return
-		}
-
-	default:
-		return nil, false, fmt.Errorf("a wrong IP version is given")
+	if err = netConn.SetDeadline(time.Now().Add(timeout)); err != nil {
+		return
 	}
 
-	packetConn, err := icmp.ListenPacket(network, address)
+	var cp *connProperties
+	cp, err = setTTL(netConn, ipv, ttl)
+	if err != nil {
+		return
+	}
+
+	// Setup a socket to listen to ICMP Echo Reply
+	packetConn, err := icmp.ListenPacket(network, cp.address)
 	if err != nil {
 		return
 	}
@@ -91,9 +84,13 @@ func hop(host string, ipv IPVersion, ttl int) (hop *Hop, reached bool, err error
 		}
 	}()
 
-	// Pepare and send an ICMP echo request
+	if err = packetConn.SetDeadline(time.Now().Add(timeout)); err != nil {
+		return
+	}
+
+	// Prepare and send an ICMP Echo Request
 	wmsg := icmp.Message{
-		Type: icmpType,
+		Type: cp.icmpType,
 		Body: &icmp.Echo{},
 	}
 
@@ -108,16 +105,21 @@ func hop(host string, ipv IPVersion, ttl int) (hop *Hop, reached bool, err error
 		return
 	}
 
-	r := make([]byte, 1500)
+	r := make([]byte, 1000)
 	_, peerAddr, err := packetConn.ReadFrom(r)
 	if err != nil {
 		return
 	}
 	rttime := time.Since(t)
 
-	rmsg, err := icmp.ParseMessage(ianaProto, r)
+	// Parse ICMP Echo Reply to understand if we reached the destination
+	rmsg, err := icmp.ParseMessage(cp.ianaProto, r)
 	if err != nil {
 		return
+	}
+
+	if rmsg.Code != echoReplyCode(ipv) {
+		return nil, false, fmt.Errorf("the response code (%d) is not an ICMP Echo Reply", rmsg.Code)
 	}
 
 	ty := fmt.Sprint(rmsg.Type)
@@ -133,6 +135,7 @@ func hop(host string, ipv IPVersion, ttl int) (hop *Hop, reached bool, err error
 	// Try to lookup one of the names associated with the peer address
 	peer := Peer{
 		Addr: peerAddr,
+		Name: peerAddr.String(),
 	}
 	names, namerr := net.LookupAddr(peerAddr.String())
 	if namerr == nil && len(names) > 0 {
@@ -146,4 +149,47 @@ func hop(host string, ipv IPVersion, ttl int) (hop *Hop, reached bool, err error
 	}
 
 	return
+}
+
+func setTTL(netConn net.Conn, ipv IPVersion, ttl int) (*connProperties, error) {
+	var cp connProperties
+	switch ipv {
+	case IPv4:
+		cp = connProperties{
+			address:   "0.0.0.0",
+			icmpType:  ipv4.ICMPTypeEcho,
+			ianaProto: ianaProtocolICMP,
+		}
+
+		if err := ipv4.NewConn(netConn).SetTTL(ttl); err != nil {
+			return nil, err
+		}
+
+	case IPv6:
+		cp = connProperties{
+			address:   "::0",
+			icmpType:  ipv6.ICMPTypeEchoRequest,
+			ianaProto: ianaProtocolIPv6ICMP,
+		}
+
+		if err := ipv6.NewConn(netConn).SetHopLimit(ttl); err != nil {
+			return nil, err
+		}
+
+	default:
+		return nil, fmt.Errorf("a wrong IP version is given")
+	}
+
+	return &cp, nil
+}
+
+func echoReplyCode(ipv IPVersion) int {
+	switch ipv {
+	case IPv4:
+		return int(ipv4.ICMPTypeEchoReply)
+	case IPv6:
+		return int(ipv6.ICMPTypeEchoReply)
+	}
+
+	return -1
 }
