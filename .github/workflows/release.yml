@@ -22,11 +22,12 @@ jobs:
       - uses: actions/setup-go@v1
         with:
           go-version: '1.13'
-      - run: GOOS=${GOOS} GOARCH=${GOARCH} make build
+      - run: GITHUB_REF=${GITHUB_REF} GOOS=${GOOS} GOARCH=${GOARCH} make build
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
+          GITHUB_REF: ${{ github.ref }}
       - uses: actions/upload-artifact@v1
         with:
-          name: tr-${GITHUB_REF}-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: tr-${{ github.ref }}-${{ matrix.goos }}-${{ matrix.goarch }}
           path: ./bin/${{ matrix.goos }}-${{ matrix.goarch }}/tr
