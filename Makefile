@@ -2,6 +2,7 @@
 GOOS?=darwin
 GOARCH?=amd64
 
+GOPROXY?=https://gocenter.io
 COMMIT := $(shell git rev-parse --short HEAD)
 BUILD_TIME := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
 GITHUB_REF?=test
@@ -11,7 +12,8 @@ test:
 
 build:
 	GOOS=${GOOS} GOARCH=${GOARCH} \
-	GO111MODULE=on CGO_ENABLED=0 go build \
+	GO111MODULE=on GOPROXY=${GOPROXY} \
+	CGO_ENABLED=0 go build \
 		-ldflags "-s -w -X main.Release=${GITHUB_REF} \
 		-X main.Commit=${COMMIT} \
 		-X main.BuildTime=${BUILD_TIME}" \
