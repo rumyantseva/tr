@@ -34,7 +34,7 @@ const (
 	icmpEchoReply    = "echo reply"
 )
 
-func Build(host string, ipv IPVersion, maxTTL int, timeout, pause time.Duration, callback func(hop *Hop, err error)) {
+func Build(host string, ipv IPVersion, maxTTL int, timeout time.Duration, callback func(hop *Hop, err error)) {
 	for ttl := 1; ttl <= maxTTL; ttl++ {
 		hop, reached, err := hop(host, ipv, ttl, timeout)
 		callback(hop, err)
@@ -42,8 +42,6 @@ func Build(host string, ipv IPVersion, maxTTL int, timeout, pause time.Duration,
 		if reached {
 			break
 		}
-
-		time.Sleep(pause)
 	}
 }
 

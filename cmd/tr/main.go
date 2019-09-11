@@ -10,6 +10,12 @@ import (
 	"github.com/rumyantseva/tr/pkg/trace"
 )
 
+var (
+	BuildTime = "unset"
+	Commit    = "unset"
+	Release   = "unset"
+)
+
 func init() {
 	flag.Usage = func() {
 		flag.PrintDefaults()
@@ -17,10 +23,11 @@ func init() {
 }
 
 func main() {
+	log.Printf("Build time: %s, Commit: %s, Release: %s", BuildTime, Commit, Release)
+
 	ipvF := flag.String("ipVersion", "", "IP version (4 or 6)")
 	maxTTLF := flag.Int("maxTTL", 64, "Max number of hops used in outgoing probes")
 	timeoutF := flag.Duration("timeout", 3*time.Second, "Max time of probe")
-	pauseF := flag.Duration("pause", 500*time.Millisecond, "Pause time between probes")
 
 	flag.Parse()
 
@@ -52,5 +59,5 @@ func main() {
 		}
 	}
 
-	trace.Build(host, ipv, *maxTTLF, *timeoutF, *pauseF, printHop)
+	trace.Build(host, ipv, *maxTTLF, *timeoutF, printHop)
 }
