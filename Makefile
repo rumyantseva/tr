@@ -15,4 +15,4 @@ build:
 		-ldflags "-s -w -X main.Release=${GITHUB_REF} \
 		-X main.Commit=${COMMIT} \
 		-X main.BuildTime=${BUILD_TIME}" \
-		-o bin/tr ./cmd/tr
+		-o bin/${GOOS}-${GOARCH}/tr ./cmd/tr
