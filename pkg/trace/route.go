@@ -7,6 +7,11 @@ import (
 
 type Hop struct {
 	TTL     int
-	Peer    net.Addr
+	Peer    Peer
 	Latency time.Duration
+}
+
+type Peer struct {
+	Name string
+	Addr net.Addr
 }

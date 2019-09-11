@@ -5,8 +5,15 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/rumyantseva/tr/pkg/trace"
+)
+
+var (
+	BuildTime = "unset"
+	Commit    = "unset"
+	Release   = "unset"
 )
 
 func init() {
@@ -16,7 +23,12 @@ func init() {
 }
 
 func main() {
+	log.Printf("Build time: %s, Commit: %s, Release: %s", BuildTime, Commit, Release)
+
 	ipvF := flag.String("ipVersion", "", "IP version (4 or 6)")
+	maxTTLF := flag.Int("maxTTL", 64, "Max number of hops used in outgoing probes")
+	timeoutF := flag.Duration("timeout", 3*time.Second, "Max time of probe")
+
 	flag.Parse()
 
 	host := strings.ToLower(flag.Arg(0))
@@ -40,8 +52,12 @@ func main() {
 	log.Printf("Looking for the route to `%s` (%s)", host, ipv)
 
 	printHop := func(hop *trace.Hop, err error) {
-		fmt.Printf("%+v, %+v\n", hop, err)
+		if err != nil {
+			fmt.Printf("  *\t*\t*\t%+v\n", err)
+		} else {
+			fmt.Printf("%3d %s (%s) %v\n", hop.TTL, hop.Peer.Name, hop.Peer.Addr, hop.Latency)
+		}
 	}
 
-	trace.Build(host, ipv, 30, printHop)
+	trace.Build(host, ipv, *maxTTLF, *timeoutF, printHop)
 }
