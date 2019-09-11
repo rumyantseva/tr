@@ -34,4 +34,4 @@ RUN go test -timeout=600s -v --race ./...
 RUN GOOS=linux GOARCH=amd64 make build
 
 # Check that it's possible to run the binary
-RUN ./bin/linux-amd64/tr github.com
+RUN ./bin/linux-amd64/tr -maxTTL 3 github.com
