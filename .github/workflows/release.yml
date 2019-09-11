@@ -1,5 +1,7 @@
 name: Release
-on: tags
+on:
+  push:
+    tags
 jobs:
 
   release:
