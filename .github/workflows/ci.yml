@@ -9,5 +9,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Run linters and test based on "docker build" approach
+    - name: Run linters and tests based on "docker build" approach
       run: docker build -f Dockerfile.test .
