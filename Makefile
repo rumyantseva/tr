@@ -5,7 +5,8 @@ GOARCH?=amd64
 GOPROXY?=https://gocenter.io
 COMMIT := $(shell git rev-parse --short HEAD)
 BUILD_TIME := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
-RELEASE?=v0.0.0
+GITHUB_REF?=refs/tags/v0.0.0
+RELEASE?=$(subst refs/tags/,,${GITHUB_REF})
 
 test:
 	go test --race ./...
