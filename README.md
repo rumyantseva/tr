@@ -52,8 +52,8 @@ reliable metric in this particular case. Due to continuous changes in the networ
 it's also quite expected that we can complete a round trip for a bigger TTL
 faster than a round trip for a smaller TTL.
 
-In this implementation, we do requests hops for every TTL value only once.
-In principle, it might make sense to do such requests a few times to have better representation for a median
+In this implementation, we send probes for every TTL value only once.
+In principle, it might make sense to do such probes a few times to have better representation for a median
 response time.
 A few attempts also might be useful if we haven't reached the desired hop from the first attempt.
 
