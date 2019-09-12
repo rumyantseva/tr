@@ -22,16 +22,16 @@ jobs:
 
     - name: Build Linux Binary
       if: startsWith(github.ref, 'refs/tags/')
-      run: GITHUB_REF=${{ github.ref }} GOOS=linux GOARCH=amd64 make build
+      run: GITHUB_REF=${{ github.ref }} GOOS=linux GOARCH=amd64 make artifact
 
     - name: Build MacOS Binary
       if: startsWith(github.ref, 'refs/tags/')
-      run: GITHUB_REF=${{ github.ref }} GOOS=darwin GOARCH=amd64 make build
+      run: GITHUB_REF=${{ github.ref }} GOOS=darwin GOARCH=amd64 make artifact
 
     - name: Release
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: ./bin/linux-amd64/tr,./bin/darwin-amd64/tr
+        files: ${ls -m ./bin/artifacts}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

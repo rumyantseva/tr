@@ -19,3 +19,8 @@ build:
 		-X main.Commit=${COMMIT} \
 		-X main.BuildTime=${BUILD_TIME}" \
 		-o bin/${GOOS}-${GOARCH}/tr ./cmd/tr
+
+artifact: build
+	mkdir -p ./bin/artifacts
+	tar -zcvf ./bin/artifacts/tr-${RELEASE}-${GOOS}-${GOARCH}.tar.gz \
+		--directory=./bin/${GOOS}-${GOARCH} tr
