@@ -83,7 +83,7 @@ For this particular task, Go Modules + `GOPROXY` should be enough.
 
 Proper testing requires quite a lot of mocks on network
 (especially, if we want to test our tool against possible network states).
-As time for the coding challenge is limited, proper unit / integration testing is our of scope now.
+As time for the coding challenge is limited, proper unit / integration testing is out of scope now.
 
 ### Continuous integration
 
