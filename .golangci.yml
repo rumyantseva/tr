@@ -10,6 +10,9 @@ output:
   print-issued-lines: true
   print-linter-name: true
 
+issues:
+  exclude-use-default: false
+
 linters-settings:
   errcheck:
     check-type-assertions: true

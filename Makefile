@@ -15,9 +15,9 @@ build:
 	GOOS=${GOOS} GOARCH=${GOARCH} \
 	GO111MODULE=on GOPROXY=${GOPROXY} \
 	CGO_ENABLED=0 go build \
-		-ldflags "-s -w -X main.Release=${RELEASE} \
-		-X main.Commit=${COMMIT} \
-		-X main.BuildTime=${BUILD_TIME}" \
+		-ldflags "-s -w -X main.release=${RELEASE} \
+		-X main.commit=${COMMIT} \
+		-X main.buildTime=${BUILD_TIME}" \
 		-o bin/${GOOS}-${GOARCH}/tr ./cmd/tr
 
 artifact: build

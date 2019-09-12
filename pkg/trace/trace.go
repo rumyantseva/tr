@@ -17,8 +17,10 @@ type connProperties struct {
 	ianaProto int
 }
 
+// IPVersion defines possible IP versions
 type IPVersion string
 
+// Possible versions of IPVersion
 const (
 	IPv4 IPVersion = "ip4"
 	IPv6 IPVersion = "ip6"
@@ -33,6 +35,9 @@ const (
 	icmpEchoReply = "echo reply"
 )
 
+// Build makes the route to the target host.
+// After every probe, it calls the callback function
+// (so the caller don't have to wait when all probes are made to build an output).
 func Build(host string, ipv IPVersion, maxTTL int, timeout time.Duration, callback func(hop *Hop, err error)) error {
 	for ttl := 1; ttl <= maxTTL; ttl++ {
 		h, reached, err := hop(host, ipv, ttl, timeout)

@@ -9,14 +9,16 @@ import (
 	"github.com/rumyantseva/tr/pkg/trace"
 )
 
+// Version parameters: build time, commit hash and semantic release number.
+// These values might be set via linker during compilation.
 var (
-	BuildTime = "unset"
-	Commit    = "unset"
-	Release   = "unset"
+	buildTime = "unset"
+	commit    = "unset"
+	release   = "unset"
 )
 
 func main() {
-	log.Printf("Build time: %s, Commit: %s, Release: %s", BuildTime, Commit, Release)
+	log.Printf("Build time: %s, Commit: %s, Release: %s", buildTime, commit, release)
 
 	ipvF := flag.String("ipVersion", "", "IP version (4 or 6)")
 	maxTTLF := flag.Int("maxTTL", 64, "Max number of hops used in outgoing probes")
