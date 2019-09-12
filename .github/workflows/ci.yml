@@ -32,6 +32,6 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: ${ls -m ./bin/artifacts}
+        files: $(ls -m ./bin/artifacts)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
