@@ -21,7 +21,9 @@ sudo ./bin/darwin-amd64/tr -ipVersion 6 google.com
 Available flags:
 
 ```
-
+  -ipVersion - IP version (4 or 6)
+  -maxTTL - Max number of hops used in outgoing probes (default 64)
+  -timeout - Max time of probe (default 3s)
 ```
 
 ### Task
@@ -40,7 +42,7 @@ For simplicity, let's choose ICMP. It won't let us specify the port for the targ
 the only host is mentioned in the original task, ICMP should be enough.
 
 In the implementation, we can send ICMP Echo Request and wait for ICMP Echo Reply.
-We start from TTL=1, and for every new request, we increase TTL until we receive ICMP Echo Reply or
+We start probes from TTL=1, and for every new probe, we increase TTL until we receive ICMP Echo Reply or
 Max TTL (provided via flags) is reached.
 
 #### Response time
@@ -57,6 +59,11 @@ A few attempts also might be useful if we haven't reached the desired hop from t
 
 However, as it was requested in the task, the largest difference in response time between consecutive hops is calculated.
 As timeouts are potentially possible, we calculate the largest difference only for hops where we don't have timeouts.
+
+#### Disclaimer
+
+I don't consider this implementation as a 100% production ready tool but it's a working prototype.
+I expect that not all the corner cases are investigated and considered in the implementation.
 
 ### Go-related Decisions
 
@@ -81,7 +88,7 @@ As time for the coding challenge is limited, unit / integration testing is our o
 ### Continuous Integration
 
 I used this coding challenge as an opportunity to try Github Actions for the first time.
-The implementation is very MVP'ish but it works :)
+The CI implementation is very MVP'ish but it works :)
 
 ### Checks & tests
 
@@ -94,7 +101,10 @@ This dockerized approach will work with any CI tool (or even locally) if Docker 
 
 How to run: `docker build -f Dockerfile.test .`
 
-The main Dockerfile to compile the
+The main `Dockerfile` is separate from the testing one on purpose.
+Potentially, there might be some malicious code in external linters
+and so they might add some unwanted artifacts to the source code of our application.
+To escape from such situations, we use separate dockerfiles for "testing" and "production" purposes.
 
 ### Release
 

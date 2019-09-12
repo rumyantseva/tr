@@ -15,12 +15,6 @@ var (
 	Release   = "unset"
 )
 
-func init() {
-	flag.Usage = func() {
-		flag.PrintDefaults()
-	}
-}
-
 func main() {
 	log.Printf("Build time: %s, Commit: %s, Release: %s", BuildTime, Commit, Release)
 
