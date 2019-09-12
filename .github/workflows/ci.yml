@@ -22,7 +22,7 @@ jobs:
 
     - name: Build Linux Binary
       if: startsWith(github.ref, 'refs/tags/')
-      run: GITHUB_REF=${{ github.ref }} GOOS=linyx GOARCH=amd64 make build
+      run: GITHUB_REF=${{ github.ref }} GOOS=linux GOARCH=amd64 make build
 
     - name: Build MacOS Binary
       if: startsWith(github.ref, 'refs/tags/')
