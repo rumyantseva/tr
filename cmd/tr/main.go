@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -51,13 +50,33 @@ func main() {
 	}
 	log.Printf("Looking for the route to `%s` (%s)", host, ipv)
 
+	var prevLatency, maxDifference int64
 	printHop := func(hop *trace.Hop, err error) {
 		if err != nil {
-			fmt.Printf("  *\t*\t*\t%+v\n", err)
+			log.Printf("  *\t*\t*\t%+v\n", err)
+			prevLatency = 0
 		} else {
-			fmt.Printf("%3d %s (%s) %v\n", hop.TTL, hop.Peer.Name, hop.Peer.Addr, hop.Latency)
+			log.Printf("%3d %s (%s) %v\n", hop.TTL, hop.Peer.Name, hop.Peer.Addr, hop.Latency)
+
+			if prevLatency != 0 {
+				diff := hop.Latency.Nanoseconds() - prevLatency
+				if diff < 0 {
+					diff = -diff
+				}
+				if diff > maxDifference {
+					maxDifference = diff
+				}
+			}
+			prevLatency = hop.Latency.Nanoseconds()
+
 		}
 	}
 
 	trace.Build(host, ipv, *maxTTLF, *timeoutF, printHop)
+
+	if maxDifference == 0 {
+		log.Printf("Couldn't calculate the largest difference in response time.")
+	} else {
+		log.Printf("The largest difference in response time is %s.", time.Duration(maxDifference))
+	}
 }
