@@ -30,23 +30,31 @@ const (
 )
 
 const (
-	icmpTimeExceeded = "time exceeded"
-	icmpEchoReply    = "echo reply"
+	icmpEchoReply = "echo reply"
 )
 
-func Build(host string, ipv IPVersion, maxTTL int, timeout time.Duration, callback func(hop *Hop, err error)) {
+func Build(host string, ipv IPVersion, maxTTL int, timeout time.Duration, callback func(hop *Hop, err error)) error {
 	for ttl := 1; ttl <= maxTTL; ttl++ {
-		hop, reached, err := hop(host, ipv, ttl, timeout)
-		callback(hop, err)
+		h, reached, err := hop(host, ipv, ttl, timeout)
+		callback(h, err)
 
 		if reached {
-			break
+			return nil
 		}
 	}
+
+	return fmt.Errorf("max TTL exceeded, target is not reached")
 }
 
 func hop(host string, ipv IPVersion, ttl int, timeout time.Duration) (hop *Hop, reached bool, err error) {
-	network := string(ipv) + ":icmp"
+	var network string
+	switch ipv {
+	case IPv4:
+		network = "ip4:icmp"
+	case IPv6:
+		network = "ip6:ipv6-icmp"
+	}
+
 	netConn, err := net.Dial(network, host)
 	if err != nil {
 		return
@@ -122,12 +130,10 @@ func hop(host string, ipv IPVersion, ttl int, timeout time.Duration) (hop *Hop, 
 
 	ty := fmt.Sprint(rmsg.Type)
 	switch ty {
-	case icmpTimeExceeded:
-		reached = false
 	case icmpEchoReply:
 		reached = true
 	default:
-		return nil, false, fmt.Errorf("received the `%s` ICMP message", rmsg.Type)
+		reached = false
 	}
 
 	// Try to lookup one of the names associated with the peer address
@@ -141,9 +147,10 @@ func hop(host string, ipv IPVersion, ttl int, timeout time.Duration) (hop *Hop, 
 	}
 
 	hop = &Hop{
-		TTL:     ttl,
+		Seq:     ttl,
 		Peer:    peer,
 		Latency: rttime,
+		Message: fmt.Sprintf("%s", rmsg.Type),
 	}
 
 	return
@@ -186,7 +193,10 @@ func echoReplyCode(ipv IPVersion) int {
 	case IPv4:
 		return int(ipv4.ICMPTypeEchoReply)
 	case IPv6:
-		return int(ipv6.ICMPTypeEchoReply)
+		// return int(ipv6.ICMPTypeEchoReply)
+		// fun fact: based on doc, I expected that for ipv6 echo reply code should be 129...
+		// but somehow it's 0 🤔
+		return 0
 	}
 
 	return -1

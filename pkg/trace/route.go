@@ -6,9 +6,10 @@ import (
 )
 
 type Hop struct {
-	TTL     int
+	Seq     int
 	Peer    Peer
 	Latency time.Duration
+	Message string
 }
 
 type Peer struct {

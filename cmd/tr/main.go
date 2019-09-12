@@ -56,7 +56,7 @@ func main() {
 			log.Printf("  *\t*\t*\t%+v\n", err)
 			prevLatency = 0
 		} else {
-			log.Printf("%3d %s (%s) %v\n", hop.TTL, hop.Peer.Name, hop.Peer.Addr, hop.Latency)
+			log.Printf("%3d %s (%s) %v (%s)\n", hop.Seq, hop.Peer.Name, hop.Peer.Addr, hop.Latency, hop.Message)
 
 			if prevLatency != 0 {
 				diff := hop.Latency.Nanoseconds() - prevLatency
@@ -72,7 +72,9 @@ func main() {
 		}
 	}
 
-	trace.Build(host, ipv, *maxTTLF, *timeoutF, printHop)
+	if err := trace.Build(host, ipv, *maxTTLF, *timeoutF, printHop); err != nil {
+		log.Fatalf("The route is not found: %v", err)
+	}
 
 	if maxDifference == 0 {
 		log.Printf("Couldn't calculate the largest difference in response time.")
