@@ -22,5 +22,5 @@ build:
 
 artifact: build
 	mkdir -p ./bin/artifacts
-	tar -zcvf ./bin/artifacts/tr-${RELEASE}-${GOOS}-${GOARCH}.tar.gz \
+	tar -zcvf ./bin/artifacts/tr-${GOOS}-${GOARCH}.tar.gz \
 		--directory=./bin/${GOOS}-${GOARCH} tr
