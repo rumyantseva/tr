@@ -65,13 +65,13 @@ As timeouts are potentially possible, we calculate the largest difference only f
 I don't consider this implementation as a 100% production ready tool but it's a working prototype.
 I expect that not all the corner cases are investigated and considered in the implementation.
 
-### Go-related Decisions
+### Go-related decisions
 
 - The `rumyantseva/tr/pkg/trace` package is designed to be used as a library, it might be included into external projects.
 - CLI-related libraries: the standard `flag` library is chosen to not to overcomplicate the tool.
 - In addition to the standard library, `golang.org/x/net` is used to work with IPv4, IPv6 and ICMP.
 
-### Dependency Management
+### Dependency management
 
 Dependency management is provided with Go Modules.
 [GoCenter](https://gocenter.io) is used as `GOPROXY` in `Makefile` and `Dockerfile`.
@@ -81,11 +81,11 @@ For this particular task, Go Modules + `GOPROXY` should be enough.
 
 ### Testing
 
-Proper testing requires quite a lot of mock on network
+Proper testing requires quite a lot of mocks on network
 (especially, if we want to test our tool against possible network states).
-As time for the coding challenge is limited, unit / integration testing is our of scope now.
+As time for the coding challenge is limited, proper unit / integration testing is our of scope now.
 
-### Continuous Integration
+### Continuous integration
 
 I used this coding challenge as an opportunity to try Github Actions for the first time.
 The CI implementation is very MVP'ish but it works :)

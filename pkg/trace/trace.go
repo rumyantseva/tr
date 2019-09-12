@@ -35,20 +35,27 @@ const (
 	icmpEchoReply = "echo reply"
 )
 
+var (
+	errTTLExceeded = fmt.Errorf("max TTL exceeded, target is not reached")
+)
+
 // Build makes the route to the target host.
 // After every probe, it calls the callback function
 // (so the caller don't have to wait when all probes are made to build an output).
 func Build(host string, ipv IPVersion, maxTTL int, timeout time.Duration, callback func(hop *Hop, err error)) error {
 	for ttl := 1; ttl <= maxTTL; ttl++ {
 		h, reached, err := hop(host, ipv, ttl, timeout)
-		callback(h, err)
+
+		if callback != nil {
+			callback(h, err)
+		}
 
 		if reached {
 			return nil
 		}
 	}
 
-	return fmt.Errorf("max TTL exceeded, target is not reached")
+	return errTTLExceeded
 }
 
 func hop(host string, ipv IPVersion, ttl int, timeout time.Duration) (hop *Hop, reached bool, err error) {
