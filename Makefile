@@ -1,4 +1,3 @@
-
 GOOS?=darwin
 GOARCH?=amd64
 
